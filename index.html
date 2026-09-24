@@ -21,6 +21,7 @@
 *{box-sizing:border-box}
 html{background:var(--bg)}
 body{margin:0;background:linear-gradient(to bottom,var(--bg),var(--card) 40%,var(--bg));background-color:var(--bg);color:var(--ink);font-family:'Noto Sans TC',system-ui,sans-serif;min-height:100vh}
+body{display:flex;flex-direction:column}main{flex:1;width:100%}
 h1,h2{font-family:'jf Open Huninn','Noto Sans TC',system-ui,sans-serif;font-weight:400}
 svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
@@ -69,6 +70,13 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 .sign.plus::after{width:3px;height:45%}
 .rule{grid-column:1/-1;height:3px;background:var(--ink);border-radius:2px}
 
+.foot{margin-top:64px;padding:32px 16px;border-top:1px solid var(--border);background:color-mix(in srgb,var(--soft) 50%,transparent);text-align:center;color:var(--muted);font-size:14px}
+.foot .brand{display:flex;align-items:center;justify-content:center;gap:12px;text-align:left;color:var(--ink)}
+.foot h3{margin:0;font-family:'jf Open Huninn','Noto Sans TC',sans-serif;font-weight:400;font-size:18px}
+.foot .brand p{margin:0;font-size:12px;color:var(--muted)}
+.foot a{color:var(--primary);text-decoration:none}
+.foot a:hover{text-decoration:underline}
+.foot .fine{font-size:12px;opacity:.7}
 .fields{display:contents}
 .types{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:20px}
 .types:empty{display:none}
@@ -78,7 +86,7 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 
 @media print{
   body{background:#fff}
-  .top,.hero p,.panel,.score{display:none}
+  .top,.hero p,.panel,.score,.foot{display:none}
   .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
   .cell input{color:transparent}
 }
@@ -104,6 +112,11 @@ button.outline{border-color:var(--primary);color:var(--primary)}
   <div class="score" id="score" aria-live="polite"></div>
   <section class="sheet" id="sheet"></section>
 </main>
+<footer class="foot">
+  <div class="brand"><span class="logo"><svg class="i" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></span><div><h3>數學小練習</h3><p>國小直式計算,隨機出題</p></div></div>
+  <p>由 <a href="https://3mi.ai/" target="_blank" rel="noopener">山米</a> 製作　·　<a href="https://wocalc.3mi.tw/" target="_blank" rel="noopener">窩算算 WoCalc</a></p>
+  <p class="fine">© <span id="year"></span> 數學小練習</p>
+</footer>
 <!-- 新題型:在 types/ 加一個檔,再在這裡多一行 script -->
 <script src="app.js" defer></script>
 <script src="types/sub-fill.js" defer></script>

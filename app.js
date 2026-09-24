@@ -117,4 +117,5 @@ window.addEventListener('hashchange', setup);
 $('newBtn').onclick = () => ask() && render();
 $('checkBtn').onclick = check;
 $('printBtn').onclick = () => print();
+$('year').textContent = new Date().getFullYear();
 document.addEventListener('DOMContentLoaded', setup);
