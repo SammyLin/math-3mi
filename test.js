@@ -34,4 +34,25 @@ for (const t of M.types) {
     assert(sols === 1, `${t.id} 答案不唯一 ${JSON.stringify(p)}`);
   }
 }
-console.log('ok', M.types.map(t => t.id).join(', '));
+// 教學動畫:每一步的進位/借位算對,最後一格拼起來要等於答案
+const stub = () => new Proxy(() => {}, { get: () => stub(), set: () => true, apply: () => stub() });
+new Function('M', 'document', src('howto.js'))(M, { getElementById: stub() });
+
+for (const t of M.types.filter(t => t.howto)) {
+  const { a, b, sign } = t.howto, n = String(a).length, op = sign === 'plus' ? a + b : a - b;
+  const steps = M.howtoSteps(t.howto);
+  assert(steps.length === n + 1, `${t.id} 教學步數應為 ${n + 1},實際 ${steps.length}`);
+  assert(steps.at(-1).res.join('') === String(op).padStart(n, '0'), `${t.id} 教學算錯 ${a},${b}`);
+  // 每一步只多算出一欄,由右往左
+  steps.slice(0, n).forEach((s, k) => assert(s.col === n - 1 - k && s.res.filter(d => d !== null).length === k + 1,
+    `${t.id} 教學第 ${k + 1} 步不是從右邊數來第 ${k + 1} 欄`));
+}
+// 隨機數字也要算對(進位、借位、連續借位)
+for (let k = 0; k < 2000; k++) {
+  const n = M.rand(2, 4), lo = 10 ** (n - 1), hi = 10 ** n - 1;
+  const x = M.rand(lo, hi), y = M.rand(lo, hi), [a, b] = [Math.max(x, y), Math.min(x, y)];
+  assert(M.howtoSteps({ a: b, b: a - b, sign: 'plus' }).at(-1).res.join('') === String(a).padStart(n, '0'), `教學加法錯 ${b}+${a - b}`);
+  assert(M.howtoSteps({ a, b, sign: 'minus' }).at(-1).res.join('') === String(a - b).padStart(n, '0'), `教學減法錯 ${a}-${b}`);
+}
+
+console.log('ok', M.types.map(t => t.id).join(', '), '+ howto');

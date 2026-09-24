@@ -108,9 +108,23 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 .chip span.on{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
 .sheet:not(.flag-place) .place-row{display:none}
 
+.tut{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:14px 16px;margin:0 0 16px;box-shadow:0 4px 6px -1px rgb(0 0 0/.05)}
+.tut>summary{cursor:pointer;font-weight:500;display:flex;align-items:center;gap:8px;list-style:none}
+.tut>summary::-webkit-details-marker{display:none}
+.tut>summary:hover{color:var(--primary)}
+.tut .stage{display:flex;justify-content:center;margin-top:10px}
+.tut .note{text-align:center;min-height:52px;margin:12px 0 4px;font-size:16px;line-height:1.5}
+.tut .ctl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.mk{height:24px;display:grid;place-items:center;font-family:Nunito,sans-serif;font-weight:800;font-size:15px;color:var(--bad)}
+.cell.on{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 30%,transparent)}
+.cell.struck::after{content:"";position:absolute;left:14%;right:14%;top:50%;height:3px;border-radius:2px;background:var(--bad);transform:rotate(-14deg)}
+.pop{animation:pop .3s ease}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}}
+
 @media print{
   body{background:#fff}
-  .top,.hero p,.panel,.score,.foot{display:none}
+  .top,.hero p,.panel,.score,.foot,.tut{display:none}
   .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
   .cell input{color:transparent}
 }
@@ -140,6 +154,17 @@ button.outline{border-color:var(--primary);color:var(--primary)}
     </div>
   </form>
 
+  <details class="tut" id="tut" hidden>
+    <summary><svg class="i" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>怎麼算?一步一步看</summary>
+    <div class="stage" id="tutStage"></div>
+    <p class="note" id="tutNote" aria-live="polite"></p>
+    <div class="ctl">
+      <button type="button" id="tutPrev"><svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>上一步</button>
+      <button type="button" class="primary" id="tutPlay"><svg class="i" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>播放</button>
+      <button type="button" id="tutNext">下一步<svg class="i" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+    </div>
+  </details>
+
   <div class="score" id="score" aria-live="polite"></div>
   <section class="sheet" id="sheet"></section>
 </main>
@@ -164,8 +189,9 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 </div></footer>
 <!-- ponytail: 改 js 要手動把 ?v= 加一;math.3mi.ai 的 zone 設定會把 _headers 的 max-age=0 蓋成 4 小時 -->
 <!-- 新題型:在 types/ 加一個檔,再在這裡多一行 script -->
-<script src="app.js?v=2" defer></script>
-<script src="types/sub-fill.js?v=2" defer></script>
-<script src="types/add-fill.js?v=2" defer></script>
+<script src="app.js?v=3" defer></script>
+<script src="types/sub-fill.js?v=3" defer></script>
+<script src="types/add-fill.js?v=3" defer></script>
+<script src="howto.js?v=3" defer></script>
 </body>
 </html>

@@ -64,6 +64,7 @@ function setup() {
     type.options.map(o => group(o.label, o.choices.map(([v, txt]) => chip('radio', o.name, v, txt, v === o.value)).join(''))).join('') +
     group('題數', COUNTS.map(v => chip('radio', 'count', v, v, v === '1')).join('')) +
     (type.flags?.length ? group('顯示', type.flags.map(f => chip('checkbox', f.name, 'on', f.label)).join('')) : '');
+  M.howto?.(type);
   render();
 }
 

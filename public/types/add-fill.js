@@ -15,6 +15,8 @@ M.register({
     { name: 'carry', label: '進位', choices: [['any', '不限'], ['yes', '要進位'], ['no', '不進位']], value: 'any' },
   ],
   flags: [{ name: 'place', label: '千百十個' }],
+  // 動畫教學用的固定例子:每一欄都會遇到進位/借位
+  howto: { a: 476, b: 258, sign: 'plus' },
 
   make(opts) {
     const n = +opts.n, lo = 10 ** (n - 1), hi = 10 ** n - 1;
