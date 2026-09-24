@@ -1,4 +1,4 @@
-// 題型外殼:選項、出題、對答案、列印。每個題型放在 types/*.js,用 M.register() 註冊。
+// 題型外殼:選項、出題、對答案。每個題型放在 types/*.js,用 M.register() 註冊。
 //
 // 題型介面:
 //   id, name              網址 #id、上方題型切換的名稱
@@ -117,6 +117,5 @@ window.addEventListener('hashchange', setup);
 // 出題按鈕一律確認(容易手誤點到);換選項只在已作答時確認
 $('newBtn').onclick = () => confirm('要換一批新題目嗎?') && render();
 $('checkBtn').onclick = check;
-$('printBtn').onclick = () => print();
 $('year').textContent = new Date().getFullYear();
 document.addEventListener('DOMContentLoaded', setup);
