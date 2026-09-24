@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://math.3mi.ai/sitemap.xml
