@@ -22,6 +22,26 @@ const M = {
       ? `<div class="cell" ${style}><input inputmode="numeric" maxlength="1" autocomplete="off" data-ans="${digit}" aria-label="${M.PLACE[n - 1 - col]}位"></div>`
       : `<div class="cell" ${style}>${digit}</div>`;
   },
+  // 三列直式填空共用:每一欄剛好一個空格 → 由右往左逐欄只有一個未知數,答案唯一
+  // 先讓三列各分到一格(2 位數只能分兩列),其餘欄隨機,最後打亂欄順序
+  // 回傳 blankRow[c] = 第 c 欄空在哪一列
+  blankPerColumn(n) {
+    const rows = M.shuffle([0, 1, 2]).slice(0, Math.min(n, 3));
+    while (rows.length < n) rows.push(M.rand(0, 2));
+    return M.shuffle(rows);
+  },
+  // 畫三列直式:nums = [上, 下, 結果] 各為 n 位數字陣列;sign = 'minus' | 'plus'
+  vertical(p, sign) {
+    const cols = [...Array(p.n).keys()];
+    const row = r => cols.map(c => M.cell(p.n, c, p.nums[r][c], p.blankRow[c] === r)).join('');
+    return `<div class="prob" style="grid-template-columns:calc(var(--box)*.72) repeat(${p.n},var(--box))">
+      <div class="place-row"></div>${cols.map(c => `<div class="place place-row" style="--c:${M.placeColor(p.n, c)}">${M.PLACE[p.n - 1 - c]}</div>`).join('')}
+      <div></div>${row(0)}
+      <div class="sign ${sign}" aria-label="${sign === 'plus' ? '加' : '減'}"></div>${row(1)}
+      <div class="rule"></div>
+      <div></div>${row(2)}
+    </div>`;
+  },
 };
 
 const COUNTS = ['1', '4', '6', '10'];

@@ -65,7 +65,8 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 .cell.bad{background:color-mix(in srgb,var(--bad) 14%,var(--card));border-color:var(--bad)}
 .place{text-align:center;font-weight:700;color:var(--c);font-size:14px}
 .sign{width:calc(var(--box)*.72);height:calc(var(--box)*.72);border:2.5px solid var(--bad);border-radius:50%;display:grid;place-items:center;justify-self:center}
-.sign::before{content:"";width:45%;height:3px;border-radius:2px;background:var(--ink)}
+.sign::before,.sign.plus::after{content:"";grid-area:1/1;width:45%;height:3px;border-radius:2px;background:var(--ink)}
+.sign.plus::after{width:3px;height:45%}
 .rule{grid-column:1/-1;height:3px;background:var(--ink);border-radius:2px}
 
 .fields{display:contents}
@@ -106,5 +107,6 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 <!-- 新題型:在 types/ 加一個檔,再在這裡多一行 script -->
 <script src="app.js" defer></script>
 <script src="types/sub-fill.js" defer></script>
+<script src="types/add-fill.js" defer></script>
 </body>
 </html>
