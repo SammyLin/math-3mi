@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>數學小練習</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'jf Open Huninn';src:url('https://cdn.jsdelivr.net/gh/justfont/open-huninn-font@master/font/jf-openhuninn-2.0.woff2') format('woff2');font-display:swap}
+/* 配色沿用 wocalc(窩算算):奶油底 + 琥珀主色 + stone 文字 */
+:root{
+  --bg:#faf8f5; --card:#fff; --ink:#292524; --muted:#78716c; --soft:#f5f0e8; --border:#e7e5e4;
+  --primary:#ca8a04; --primary-fg:#fff;
+  /* 位值顏色:個=藍 十=綠 百=黃 千=紅(對照教具) */
+  --p0:#3d9be0; --p1:#5fa52e; --p2:#e0a100; --p3:#e8603f;
+  --ok:#16a34a; --bad:#dc2626;
+  --box:clamp(44px,12vw,58px);
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:linear-gradient(to bottom,var(--bg),var(--card) 40%,var(--bg));background-color:var(--bg);color:var(--ink);font-family:'Noto Sans TC',system-ui,sans-serif;min-height:100vh}
+h1,h2{font-family:'jf Open Huninn','Noto Sans TC',system-ui,sans-serif;font-weight:400}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.top{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--card) 80%,transparent);backdrop-filter:blur(16px)}
+.top .bar{max-width:1152px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--primary);color:var(--primary-fg);display:grid;place-items:center}
+.logo svg.i{width:22px;height:22px}
+.top h1{margin:0;font-size:20px}
+.top p{margin:0;font-size:12px;color:var(--muted)}
+.hero{text-align:center;margin:32px 0 8px}
+.hero h2{margin:0;font-size:clamp(26px,6vw,36px)}
+.hero h2 span{color:var(--primary)}
+.hero p{color:var(--muted);margin:8px 0 0}
+main{max-width:1152px;margin:0 auto;padding:0 16px 48px}
+
+.panel{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:16px;margin:24px 0 16px;box-shadow:0 10px 15px -3px rgb(0 0 0/.06),0 4px 6px -4px rgb(0 0 0/.06);display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center}
+.group{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.group>b{font-size:14px;font-weight:500;color:var(--muted);margin-right:4px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:15px;user-select:none;transition:all .15s}
+.chip span:hover{background:var(--soft)}
+.chip input:checked+span{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
+.chip input:focus-visible+span{outline:3px solid color-mix(in srgb,var(--primary) 50%,transparent);outline-offset:2px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+button{font:inherit;font-weight:500;font-size:15px;border:1px solid var(--border);border-radius:8px;padding:9px 16px;cursor:pointer;background:var(--card);color:var(--ink);display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+button:hover{background:var(--soft)}
+button.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
+button.primary:hover{filter:brightness(1.05)}
+button.outline{border-color:var(--primary);color:var(--primary)}
+
+.score{text-align:center;font-weight:700;font-size:20px;min-height:28px;margin:4px 0}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.card{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:16px 12px 18px;box-shadow:0 4px 6px -1px rgb(0 0 0/.05);position:relative}
+.no{position:absolute;top:10px;left:14px;font-family:Nunito,sans-serif;font-weight:800;color:var(--muted);font-size:15px}
+.prob{display:grid;gap:10px;justify-content:center;align-items:center;margin-top:14px}
+.cell{position:relative;width:var(--box);height:var(--box);border:2.5px solid var(--c);border-radius:8px;display:grid;place-items:center;font-family:Nunito,sans-serif;font-weight:800;font-size:calc(var(--box)*.58);line-height:1;color:var(--ink)}
+.cell input{width:100%;height:100%;border:0;background:transparent;text-align:center;font:inherit;color:var(--c);padding:0;border-radius:6px}
+.cell input:focus{outline:none;background:color-mix(in srgb,var(--c) 12%,transparent)}
+.cell.ok{background:color-mix(in srgb,var(--ok) 14%,var(--card));border-color:var(--ok)}
+.cell.bad::after{content:attr(data-correct);position:absolute;right:3px;bottom:1px;font-size:calc(var(--box)*.3);color:var(--ok)}
+.cell.bad{background:color-mix(in srgb,var(--bad) 14%,var(--card));border-color:var(--bad)}
+.place{text-align:center;font-weight:700;color:var(--c);font-size:14px}
+.sign{width:calc(var(--box)*.72);height:calc(var(--box)*.72);border:2.5px solid var(--bad);border-radius:50%;display:grid;place-items:center;justify-self:center}
+.sign::before{content:"";width:45%;height:3px;border-radius:2px;background:var(--ink)}
+.rule{grid-column:1/-1;height:3px;background:var(--ink);border-radius:2px}
+
+.fields{display:contents}
+.types{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:20px}
+.types:empty{display:none}
+.types a{text-decoration:none;color:inherit}
+.chip span.on{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
+.sheet:not(.flag-place) .place-row{display:none}
+
+@media print{
+  body{background:#fff}
+  .top,.hero p,.panel,.score{display:none}
+  .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  .cell input{color:transparent}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="bar">
+  <span class="logo"><svg class="i" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></span>
+  <div><h1>數學小練習</h1><p>國小直式計算,隨機出題</p></div>
+</div></header>
+<main>
+  <nav class="types" id="types"></nav>
+  <section class="hero"><h2 id="title"></h2><p id="desc"></p></section>
+  <form class="panel" id="opts" onsubmit="return false">
+    <div id="fields" class="fields"></div>
+    <div class="actions">
+      <button type="button" class="primary" id="newBtn"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>出題</button>
+      <button type="button" class="outline" id="checkBtn"><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>對答案</button>
+      <button type="button" id="printBtn"><svg class="i" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>列印</button>
+    </div>
+  </form>
+
+  <div class="score" id="score" aria-live="polite"></div>
+  <section class="sheet" id="sheet"></section>
+</main>
+<!-- 新題型:在 types/ 加一個檔,再在這裡多一行 script -->
+<script src="app.js" defer></script>
+<script src="types/sub-fill.js" defer></script>
+</body>
+</html>
