@@ -4,7 +4,8 @@ const fs = require('fs');
 const src = f => fs.readFileSync(`public/${f}`, 'utf8');
 const types = fs.readdirSync('public/types').map(f => src(`types/${f}`)).join('\n');
 // app.js 前半段是純函式的 M,後半段才碰 DOM
-eval(src('app.js').split('const COUNTS')[0] + types);
+const { M, needsBorrow, needsCarry } = new Function(
+  src('app.js').split('const COUNTS')[0] + types + '\nreturn { M, needsBorrow, needsCarry };')();
 
 const CHECK = {
   'sub-fill': { op: (x, y) => x - y, opt: 'borrow', has: (a, b, n) => needsBorrow(a, b, n) },

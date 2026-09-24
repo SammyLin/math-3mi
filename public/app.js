@@ -114,7 +114,8 @@ form.addEventListener('change', e => {
 });
 $('types').addEventListener('click', e => { if (!ask()) e.preventDefault(); });
 window.addEventListener('hashchange', setup);
-$('newBtn').onclick = () => ask() && render();
+// 出題按鈕一律確認(容易手誤點到);換選項只在已作答時確認
+$('newBtn').onclick = () => confirm('要換一批新題目嗎?') && render();
 $('checkBtn').onclick = check;
 $('printBtn').onclick = () => print();
 $('year').textContent = new Date().getFullYear();
