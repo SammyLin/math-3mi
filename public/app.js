@@ -1,7 +1,7 @@
 // 題型外殼:選項、出題、對答案。每個題型放在 types/*.js,用 M.register() 註冊。
 //
 // 題型介面:
-//   id, name              網址 #id、上方題型切換的名稱
+//   id, name, path        題型代號、上方切換的名稱、專屬網址
 //   title, desc           標題(可含 <span> 強調)與說明
 //   options               [{ name, label, choices: [[value, text]...], value }] 會重新出題的選項
 //   flags                 [{ name, label }] 只切換顯示,不重出題;勾選時 sheet 加上 flag-<name> class
@@ -54,10 +54,10 @@ const chip = (kind, name, value, text, checked) =>
 const group = (label, inner) => `<div class="group"><b>${label}</b>${inner}</div>`;
 
 function setup() {
-  type = M.types.find(t => '#' + t.id === location.hash) || M.types[0];
-  document.title = `${type.name} · 數學小練習`;
+  const want = document.body.dataset.type || location.hash.slice(1);
+  type = M.types.find(t => t.id === want) || M.types[0];
   $('types').innerHTML = M.types.length < 2 ? '' :
-    M.types.map(t => `<a href="#${t.id}" class="chip"><span${t === type ? ' class="on"' : ''}>${t.name}</span></a>`).join('');
+    M.types.map(t => `<a href="${t.path}" class="chip"><span${t === type ? ' class="on"' : ''}>${t.name}</span></a>`).join('');
   $('title').innerHTML = type.title;
   $('desc').textContent = type.desc;
   $('fields').innerHTML =

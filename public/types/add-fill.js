@@ -8,6 +8,7 @@ function needsCarry(a, b, n) {
 M.register({
   id: 'add-fill',
   name: '加法填空',
+  path: '/add/',
   title: '直式<span>加法填空</span>',
   desc: '每一位都有一格要自己想',
   options: [

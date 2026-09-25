@@ -12,6 +12,7 @@ function needsBorrow(a, b, n) {
 M.register({
   id: 'sub-fill',
   name: '減法填空',
+  path: '/sub/',
   title: '直式<span>減法填空</span>',
   desc: '每一位都有一格要自己想',
   options: [
