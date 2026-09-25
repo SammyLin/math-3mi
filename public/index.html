@@ -25,6 +25,12 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"數學小練習","url":"https://math.3mi.ai/","applicationCategory":"EducationalApplication","operatingSystem":"Any","inLanguage":"zh-TW","description":"國小直式加法、減法填空隨機出題，可選位數與進位借位，線上對答案或列印成練習卷。","educationalLevel":"國小","learningResourceType":"練習題","offers":{"@type":"Offer","price":"0","priceCurrency":"TWD"},"author":{"@type":"Person","name":"山米","url":"https://3mi.ai/"}}
 </script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"直式加法怎麼進位","description":"用 476 + 258 示範直式加法從個位往左算、滿十進位的做法。","inLanguage":"zh-TW","step":[{"@type":"HowToStep","name":"個位相加","text":"6 + 8 = 14,個位寫 4,進位的 1 記到十位。"},{"@type":"HowToStep","name":"十位相加","text":"7 + 5 再加上進位的 1 等於 13,十位寫 3,進位 1 到百位。"},{"@type":"HowToStep","name":"百位相加","text":"4 + 2 加上進位的 1 等於 7,答案是 734。"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"直式減法怎麼借位","description":"用 734 - 258 示範直式減法不夠減時向左借位的做法。","inLanguage":"zh-TW","step":[{"@type":"HowToStep","name":"個位不夠減就借位","text":"4 比 8 小,跟十位借 1,十位 3 改成 2,個位變 14,14 - 8 = 6。"},{"@type":"HowToStep","name":"十位再借一次","text":"十位剩 2 比 5 小,跟百位借 1,百位 7 改成 6,十位變 12,12 - 5 = 7。"},{"@type":"HowToStep","name":"百位相減","text":"百位剩 6,6 - 2 = 4,答案是 476。"}]}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
@@ -122,9 +128,17 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.pop{animation:none}}
 
+.guide{max-width:52rem;margin:48px auto 0;line-height:1.85;color:var(--ink)}
+.guide h2{font-size:clamp(22px,4vw,28px);margin:0 0 12px}
+.guide h3{font-family:'jf Open Huninn','Noto Sans TC',system-ui,sans-serif;font-weight:400;font-size:clamp(18px,3vw,21px);margin:32px 0 8px}
+.guide p{margin:0 0 12px}
+.guide ol,.guide ul{margin:0 0 12px;padding-left:1.4em}
+.guide li{margin-bottom:6px}
+.guide strong{font-weight:700;color:#a16207}
+
 @media print{
   body{background:#fff}
-  .top,.hero p,.panel,.score,.foot,.tut{display:none}
+  .top,.hero p,.panel,.score,.foot,.tut,.guide{display:none}
   .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
   .cell input{color:transparent}
 }
@@ -145,7 +159,7 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 </div></header>
 <main>
   <nav class="types" id="types"></nav>
-  <section class="hero"><h2 id="title"></h2><p id="desc"></p></section>
+  <section class="hero"><h2 id="title">直式<span>減法填空</span></h2><p id="desc">每一位都有一格要自己想</p></section>
   <form class="panel" id="opts" onsubmit="return false">
     <div id="fields" class="fields"></div>
     <div class="actions">
@@ -167,6 +181,41 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 
   <div class="score" id="score" aria-live="polite"></div>
   <section class="sheet" id="sheet"></section>
+  <section class="guide">
+    <h2>直式加減法填空,是在練什麼?</h2>
+    <p>一般的直式計算只留答案那一列給小孩填。這裡不一樣:<strong>每一個直欄都會挖掉一格</strong>,挖掉的可能在被加數、加數,也可能在答案。因為一欄只缺一個數,由右往左一欄一欄推,答案還是只有一種填法,但小孩沒辦法「照著步驟抄」,必須真的知道這一欄在做什麼。</p>
+    <p>適合已經學過直式加減、正在練進位與借位的國小二到四年級。位數可以選 2 到 4 位,也可以指定<strong>一定要進位</strong>或<strong>完全不進位</strong>,拿來針對弱點出題。</p>
+
+    <h3>直式加法:進位是怎麼來的</h3>
+    <p>以 476 + 258 為例,從個位開始往左算:</p>
+    <ol>
+      <li><strong>個位</strong>:6 + 8 = 14。個位只能放一個數字,所以寫 4,多出來的 10 換成 1 個十,記在十位上面。這個小小的 1 就是進位。</li>
+      <li><strong>十位</strong>:7 + 5,再加上剛剛進位的 1,等於 13。十位寫 3,再進位 1 到百位。</li>
+      <li><strong>百位</strong>:4 + 2,加上進位的 1,等於 7。沒有超過 9,不用再進位。</li>
+    </ol>
+    <p>答案是 734。重點只有一句:<strong>一欄裝不下十個,就把滿十的部分送到左邊那一欄</strong>。</p>
+
+    <h3>直式減法:借位在借什麼</h3>
+    <p>以 734 - 258 為例,一樣從個位開始:</p>
+    <ol>
+      <li><strong>個位</strong>:4 比 8 小,不夠減。跟十位借 1 個十,十位的 3 劃掉改成 2,個位的 4 變成 14,14 - 8 = 6。</li>
+      <li><strong>十位</strong>:剛剛被借走一個,只剩 2,2 比 5 小,再跟百位借。百位的 7 劃掉改成 6,十位變成 12,12 - 5 = 7。</li>
+      <li><strong>百位</strong>:剩下 6,6 - 2 = 4。</li>
+    </ol>
+    <p>答案是 476。借位不是「憑空多 10」,是<strong>把左邊的 1 個十拆成 10 個一</strong>拿過來用,所以左邊一定要同時變少 1。上面的動畫就是照這個記號一步一步畫。</p>
+
+    <h3>最常見的三個錯</h3>
+    <ul>
+      <li><strong>忘記把進位加進去</strong>:十位算完只加了兩個數字,漏掉上面那個小 1。檢查方式是每一欄算完先看上面有沒有記號。</li>
+      <li><strong>借了位卻沒把左邊減掉</strong>:個位變成 14 了,十位卻還當成原來的 3 在算,答案會多 10。</li>
+      <li><strong>位數沒對齊</strong>:寫直式時個位要對個位。打開「千百十個」的標示,每一欄是什麼位就一目了然。</li>
+    </ul>
+
+    <h3>給家長和老師</h3>
+    <p>題數可以選 1、4、6、10 題。想在旁邊陪著講就選 1 題,慢慢講完一題再出下一題;要當作練習卷就選 10 題,用瀏覽器列印(Windows 按 Ctrl+P、Mac 按 Cmd+P),答案格會自動留白,印出來就是一張可以寫的考卷。</p>
+    <p>孩子卡住的時候,先不要直接報答案,把上面的「怎麼算?一步一步看」打開,讓他看同一個位置的進位或借位是怎麼處理的,再回來看自己那一題。</p>
+  </section>
+
 </main>
 <!-- 頁尾沿用 3mi 各站共用那組(putguard SiteFooter.jsx),不要另外發明 -->
 <footer class="foot"><div class="wrap">
@@ -189,9 +238,9 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 </div></footer>
 <!-- ponytail: 改 js 要手動把 ?v= 加一;math.3mi.ai 的 zone 設定會把 _headers 的 max-age=0 蓋成 4 小時 -->
 <!-- 新題型:在 types/ 加一個檔,再在這裡多一行 script -->
-<script src="app.js?v=3" defer></script>
-<script src="types/sub-fill.js?v=3" defer></script>
-<script src="types/add-fill.js?v=3" defer></script>
-<script src="howto.js?v=3" defer></script>
+<script src="app.js?v=4" defer></script>
+<script src="types/sub-fill.js?v=4" defer></script>
+<script src="types/add-fill.js?v=4" defer></script>
+<script src="howto.js?v=4" defer></script>
 </body>
 </html>
