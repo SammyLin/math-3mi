@@ -19,7 +19,7 @@ const M = {
   cell(n, col, digit, blank) {
     const style = `style="--c:${M.placeColor(n, col)}"`;
     return blank
-      ? `<div class="cell" ${style}><input inputmode="numeric" maxlength="1" autocomplete="off" data-ans="${digit}" aria-label="${M.PLACE[n - 1 - col]}位"></div>`
+      ? `<div class="cell" ${style}><input inputmode="numeric" maxlength="1" autocomplete="off" data-ans="${digit}" data-col="${col}" aria-label="${M.PLACE[n - 1 - col]}位"></div>`
       : `<div class="cell" ${style}>${digit}</div>`;
   },
   // 三列直式填空共用:每一欄剛好一個空格 → 由右往左逐欄只有一個未知數,答案唯一
@@ -98,15 +98,28 @@ function check() {
 const dirty = () => [...sheet.querySelectorAll('input[data-ans]')].some(i => i.value);
 const ask = () => !dirty() || confirm('要換一批新題目嗎?目前填的答案會清掉。');
 
-// 只收數字;填完一格自動跳下一個空格
+// 作答順序跟著直式的算法走:同一題從個位往左(個、十、百、千),整題填完才換下一題。
+// DOM 是一列一列排的(讀屏軟體要照這個順序唸),所以順序在這裡另外算,不動版面。
+const answerOrder = () => [...sheet.querySelectorAll('.card')].flatMap(card =>
+  [...card.querySelectorAll('input[data-ans]')].sort((a, b) => b.dataset.col - a.dataset.col));
+const step = (inp, by) => {
+  const all = answerOrder();
+  return all[all.indexOf(inp) + by];
+};
+
+// 只收數字;填完一格自動跳下一格
 sheet.addEventListener('input', e => {
   const inp = e.target;
   inp.value = inp.value.replace(/\D/g, '');
   inp.parentElement.classList.remove('ok', 'bad');
-  if (inp.value) {
-    const all = [...sheet.querySelectorAll('input[data-ans]')];
-    all[all.indexOf(inp) + 1]?.focus();
-  }
+  if (inp.value) step(inp, 1)?.focus();
+});
+
+// Tab 也照同一個順序;走到頭就讓瀏覽器接手,才出得了這張卷子
+sheet.addEventListener('keydown', e => {
+  if (e.key !== 'Tab' || !e.target.dataset.ans) return;
+  const next = step(e.target, e.shiftKey ? -1 : 1);
+  if (next) { e.preventDefault(); next.focus(); }
 });
 
 form.addEventListener('change', e => {
