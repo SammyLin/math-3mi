@@ -73,6 +73,8 @@ function render() {
   sheet.innerHTML = Array.from({ length: +opts.count }, (_, i) =>
     `<article class="card"><span class="no">${i + 1}.</span>${type.render(type.make(opts))}</article>`).join('');
   $('score').textContent = '';
+  $('score').classList.remove('win');
+  resetTimer();
   flags();
 }
 
@@ -81,17 +83,77 @@ function flags() {
   (type.flags || []).forEach(({ name }) => sheet.classList.toggle('flag-' + name, f.has(name)));
 }
 
+// 音效現場合成,不放音檔。notes = [頻率, 幾秒後開始, 長度, 波形]
+const SOUND_KEY = 'math-sound';
+const soundOn = () => { try { return localStorage.getItem(SOUND_KEY) !== 'off'; } catch { return true; } };
+let audio;
+function play(notes) {
+  if (!soundOn()) return;
+  try {
+    audio ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === 'suspended') audio.resume();
+    for (const [freq, at, dur, type] of notes) {
+      const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime + at;
+      o.type = type || 'sine';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(audio.destination);
+      o.start(t);
+      o.stop(t + dur + 0.02);
+    }
+  } catch { /* 沒有 WebAudio 就靜音,別讓對答案掛掉 */ }
+}
+const CHEER = [[523, 0, .14], [659, .11, .14], [784, .22, .32]];
+const NOPE = [[196, 0, .18, 'square'], [147, .15, .3, 'square']];
+
+// 計時:第一次填答才開始,對完答案停住,重新出題歸零
+let t0 = null, ticking = null;
+const secs = () => (t0 ? Math.round((Date.now() - t0) / 1000) : 0);
+const mmss = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const human = s => (s >= 60 ? `${Math.floor(s / 60)} 分 ${s % 60} 秒` : `${s} 秒`);
+const paintClock = () => { $('clock').textContent = mmss(secs()); };
+function startTimer() {
+  if (t0) return;
+  t0 = Date.now();
+  ticking = setInterval(paintClock, 1000);
+  $('timer').classList.add('run');
+  paintClock();
+}
+function stopTimer() {
+  clearInterval(ticking);
+  ticking = null;
+  $('timer').classList.remove('run');
+}
+function resetTimer() {
+  stopTimer();
+  t0 = null;
+  $('clock').textContent = '00:00';
+}
+
 function check() {
-  const inputs = sheet.querySelectorAll('input[data-ans]');
-  let ok = 0;
-  inputs.forEach(inp => {
-    const right = inp.value.trim() === inp.dataset.ans;
-    ok += right;
-    inp.parentElement.classList.toggle('ok', right);
-    inp.parentElement.classList.toggle('bad', !right);
-    inp.parentElement.dataset.correct = inp.dataset.ans;
-  });
-  $('score').textContent = ok === inputs.length ? `全對!${ok} / ${inputs.length}` : `答對 ${ok} / ${inputs.length} 格`;
+  stopTimer();
+  const inputs = [...sheet.querySelectorAll('input[data-ans]')];
+  const right = inp => inp.value.trim() === inp.dataset.ans;
+  const ok = inputs.filter(right).length;
+  const all = ok === inputs.length;
+  const used = secs();
+
+  // 先清掉再重上,連按兩次對答案動畫才會重播
+  inputs.forEach(inp => { inp.parentElement.classList.remove('ok', 'bad'); inp.parentElement.style.animationDelay = ''; });
+  requestAnimationFrame(() => answerOrder().forEach((inp, i) => {
+    const cell = inp.parentElement;
+    cell.style.animationDelay = `${i * 45}ms`;
+    cell.classList.add(right(inp) ? 'ok' : 'bad');
+    cell.dataset.correct = inp.dataset.ans;
+  }));
+
+  $('score').textContent =
+    (all ? `全對!${ok} / ${inputs.length}` : `答對 ${ok} / ${inputs.length} 格`) +
+    (t0 ? `,用了 ${human(used)}` : '');
+  $('score').classList.toggle('win', all);
+  play(all ? CHEER : NOPE);
 }
 
 // 已經填了答案就先確認,避免手誤把整張洗掉
@@ -112,12 +174,14 @@ sheet.addEventListener('input', e => {
   const inp = e.target;
   inp.value = inp.value.replace(/\D/g, '');
   inp.parentElement.classList.remove('ok', 'bad');
-  if (inp.value) step(inp, 1)?.focus();
+  if (inp.value) { startTimer(); step(inp, 1)?.focus(); }
 });
 
 // Tab 也照同一個順序;走到頭就讓瀏覽器接手,才出得了這張卷子
 sheet.addEventListener('keydown', e => {
-  if (e.key !== 'Tab' || !e.target.dataset.ans) return;
+  if (!e.target.dataset.ans) return;
+  if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); check(); return; }
+  if (e.key !== 'Tab') return;
   const next = step(e.target, e.shiftKey ? -1 : 1);
   if (next) { e.preventDefault(); next.focus(); }
 });
@@ -131,5 +195,20 @@ window.addEventListener('hashchange', setup);
 // 出題按鈕一律確認(容易手誤點到);換選項只在已作答時確認
 $('newBtn').onclick = () => confirm('要換一批新題目嗎?') && render();
 $('checkBtn').onclick = check;
+
+const SPEAKER = '<svg class="i" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>';
+const MUTED = '<svg class="i" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>';
+function paintSound() {
+  const on = soundOn();
+  $('soundBtn').innerHTML = on ? SPEAKER : MUTED;
+  $('soundBtn').setAttribute('aria-pressed', String(on));
+  $('soundBtn').title = on ? '音效開著,點一下關掉' : '音效關著,點一下打開';
+}
+$('soundBtn').onclick = () => {
+  try { localStorage.setItem(SOUND_KEY, soundOn() ? 'off' : 'on'); } catch { /* 無痕模式存不了就算了 */ }
+  paintSound();
+  if (soundOn()) play([[659, 0, .12]]);
+};
+paintSound();
 $('year').textContent = new Date().getFullYear();
 document.addEventListener('DOMContentLoaded', setup);
