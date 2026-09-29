@@ -174,6 +174,22 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 .board-list li.new{background:color-mix(in srgb,var(--primary) 14%,var(--card));border-radius:8px;animation:pop .4s ease}
 .board-list li.empty{color:var(--muted);justify-content:center}
 
+.brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}
+.grade{margin:32px 0 0}
+.grade-head{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+.grade-head h2{margin:0;font-size:26px}
+.grade-head span{color:var(--muted);font-size:14px}
+.topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
+.topic{display:flex;gap:14px;align-items:center;padding:18px;background:var(--card);border:2px solid var(--border);border-radius:14px;text-decoration:none;color:inherit;box-shadow:0 4px 6px -1px rgb(0 0 0/.05);transition:border-color .15s,transform .15s}
+.topic:hover{border-color:var(--c);transform:translateY(-2px)}
+.topic:focus-visible{outline:3px solid color-mix(in srgb,var(--c) 50%,transparent);outline-offset:2px}
+.topic .ic{width:52px;height:52px;border-radius:12px;background:color-mix(in srgb,var(--c) 15%,var(--card));color:var(--c);display:grid;place-items:center;flex:none}
+.topic .ic svg{width:28px;height:28px;stroke-width:2.5}
+.topic h3{margin:0;font-family:jfOpenHuninn,'Noto Sans TC',system-ui,sans-serif;font-weight:400;font-size:20px}
+.topic p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.topic .go{margin-left:auto;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.topic:hover{transform:none}}
+
 @media print{
   body{background:#fff}
   .top,.hero p,.panel,.score,.foot,.tut,.guide,.finish,.board{display:none}
@@ -192,10 +208,30 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 </head>
 <body{{TYPEATTR}}>
 <header class="top"><div class="bar">
-  <span class="logo"><svg class="i" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></span>
-  <div><h1>數學小練習</h1><p>國小數學,隨機出題</p></div>
+  <a class="brand" href="/"><span class="logo"><svg class="i" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg></span>
+  <div><h1>數學小練習</h1><p>國小數學,隨機出題</p></div></a>
 </div></header>
 <main>
+<!--only:home-->
+  <section class="hero"><h2>挑一個<span>題型</span>開始練</h2><p>依年級分類,每一題都隨機出,線上對答案或列印成練習卷</p></section>
+  <!-- 新年級:複製一整個 section.grade;新題型:在該年級的 .topics 裡多一張 a.topic -->
+  <section class="grade" aria-labelledby="g3">
+    <div class="grade-head"><h2 id="g3">小三</h2><span>國小三年級</span></div>
+    <div class="topics">
+      <a class="topic" href="/add/" style="--c:var(--p0)">
+        <span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></span>
+        <span><h3>直式加法填空</h3><p>進位 · 2 到 4 位數 · 動畫教學</p></span>
+        <svg class="i go" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+      <a class="topic" href="/sub/" style="--c:var(--p3)">
+        <span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></span>
+        <span><h3>直式減法填空</h3><p>借位 · 2 到 4 位數 · 動畫教學</p></span>
+        <svg class="i go" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+  </section>
+<!--/only:home-->
+<!--not:home-->
   <nav class="types" id="types"></nav>
   <section class="hero"><h2 id="title">{{HERO}}</h2><p id="desc">每一位都有一格要自己想</p></section>
   <form class="panel" id="opts" onsubmit="return false">
@@ -240,6 +276,7 @@ button.outline{border-color:var(--primary);color:var(--primary)}
       </div>
     </form>
   </dialog>
+<!--/not:home-->
   <section class="guide">
 <!--only:home-->
     <h2>直式加減法填空,是在練什麼?</h2>
@@ -256,7 +293,7 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 
     <h3>給家長和老師</h3>
     <p>題數可以選 1、4、6、10 題。想在旁邊陪著講就選 1 題,慢慢講完一題再出下一題;要當作練習卷就選 10 題,用瀏覽器列印(Windows 按 Ctrl+P、Mac 按 Cmd+P),答案格會自動留白,印出來就是一張可以寫的考卷。</p>
-    <p>孩子卡住的時候,先不要直接報答案,把上面的「怎麼算?一步一步看」打開,讓他看同一個位置的進位或借位是怎麼處理的,再回來看自己那一題。</p>
+    <p>孩子卡住的時候,先不要直接報答案,把題目頁上方的「怎麼算?一步一步看」打開,讓他看同一個位置的進位或借位是怎麼處理的,再回來看自己那一題。</p>
 <!--/only:home-->
 <!--only:add-->
     <h2>直式加法的進位,是怎麼來的</h2>
@@ -315,14 +352,16 @@ button.outline{border-color:var(--primary);color:var(--primary)}
     <a href="https://reads.3mi.ai" target="_blank" rel="noopener">Reads</a>
     <a href="https://trending.3mi.ai" target="_blank" rel="noopener">Trending</a>
     <a href="https://chunkup.3mi.ai" target="_blank" rel="noopener">ChunkUp</a>
-    <span class="copy">© <span id="year"></span> Sammy Lin</span>
+    <span class="copy">© {{YEAR}} Sammy Lin</span>
   </div>
 </div></footer>
 <!-- ponytail: 改 js 要手動把 ?v= 加一;math.3mi.ai 的 zone 設定會把 _headers 的 max-age=0 蓋成 4 小時 -->
 <!-- 新題型:在 types/ 加一個檔,再在這裡多一行 script -->
-<script src="/app.js?v=11" defer></script>
-<script src="/types/sub-fill.js?v=11" defer></script>
-<script src="/types/add-fill.js?v=11" defer></script>
-<script src="/howto.js?v=11" defer></script>
+<!--not:home-->
+<script src="/app.js?v=12" defer></script>
+<script src="/types/sub-fill.js?v=12" defer></script>
+<script src="/types/add-fill.js?v=12" defer></script>
+<script src="/howto.js?v=12" defer></script>
+<!--/not:home-->
 </body>
 </html>

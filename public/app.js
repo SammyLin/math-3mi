@@ -304,5 +304,4 @@ $('soundBtn').onclick = () => {
   if (soundOn()) play([[659, 0, .12]]);
 };
 paintSound();
-$('year').textContent = new Date().getFullYear();
 document.addEventListener('DOMContentLoaded', setup);

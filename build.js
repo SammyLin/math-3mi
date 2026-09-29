@@ -1,7 +1,8 @@
 // 把 public/ 和根目錄的圖示、robots 組成 dist/,同時從同一份 index.html
-// 產出三個網址:/ 是總覽,/add/ 和 /sub/ 各自針對一種題型。
-//   node build.js && npx wrangler pages deploy dist --project-name=math-3mi
-// index.html 裡的 {{...}} 由這裡填,<!--only:x-->...<!--/only:x--> 只留該頁那塊。
+// 產出三個網址:/ 是依年級分類的題型目錄,/add/ 和 /sub/ 各自針對一種題型。
+//   node build.js && npx wrangler pages deploy   (wrangler.toml 指定 dist)
+// index.html 裡的 {{...}} 由這裡填,<!--only:x-->...<!--/only:x--> 只留該頁那塊,
+// <!--not:x-->...<!--/not:x--> 則是該頁拿掉那塊(首頁不放出題區和 js)。
 const fs = require('fs');
 const path = require('path');
 
@@ -9,10 +10,10 @@ const SITE = 'https://math.3mi.ai';
 const PAGES = [
   {
     out: 'index.html', keep: 'home', type: '', url: `${SITE}/`,
-    hero: '直式<span>減法填空</span>',
-    title: '數學小練習｜國小直式加減法填空練習題、可列印',
-    ogtitle: '數學小練習:國小直式計算,隨機出題',
-    desc: '免費國小數學練習:直式加法、減法填空隨機出題,可選 2 到 4 位數、要不要進位或借位,線上對答案,也能直接列印成練習卷。',
+    hero: '',
+    title: '數學小練習｜國小數學練習題,依年級分類、線上出題、可列印',
+    ogtitle: '數學小練習:國小數學,依年級挑題型',
+    desc: '免費國小數學練習,依年級分類挑題型:每一題隨機出,線上對答案,也能直接列印成練習卷。',
   },
   {
     out: 'add/index.html', keep: 'add', type: 'add-fill', url: `${SITE}/add/`,
@@ -46,6 +47,9 @@ for (const p of PAGES) {
     html = k === p.keep ? html.replace(new RegExp(`<!--/?only:${k}-->`, 'g'), '') : html.replace(block, '');
   }
   html = html
+    .replace(new RegExp(`<!--not:${p.keep}-->[\\s\\S]*?<!--/not:${p.keep}-->`, 'g'), '')
+    .replace(/<!--\/?not:\w+-->/g, '')
+    .replace(/{{YEAR}}/g, new Date().getFullYear())
     .replace(/{{TITLE}}/g, p.title)
     .replace(/{{OGTITLE}}/g, p.ogtitle)
     .replace(/{{DESC}}/g, p.desc)
