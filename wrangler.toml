@@ -1,2 +1,9 @@
 name = "math-3mi"
 pages_build_output_dir = "dist"
+compatibility_date = "2025-09-01"
+
+# 全域排行榜;表結構見 schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "math-3mi"
+database_id = "4e37bc17-79ce-4fd8-9f3f-bcd6b60caedc"

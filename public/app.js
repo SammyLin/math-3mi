@@ -200,31 +200,55 @@ function confetti() {
   })(start);
 }
 
-// 排行榜:存在這台裝置(localStorage),同一組選項(題型、位數、進借位、題數)比全對用時,留前 10 名
-const BOARD_KEY = 'math-board', NAME_KEY = 'math-name';
-const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
-const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* 無痕模式存不了就算了 */ } };
+// 排行榜:全站共用(functions/api/board.js + D1),同一組選項(題型、位數、進借位、題數)比全對用時,留前 10 名
+// 擠進前 10 才跳出視窗問名字;名字記在這台裝置,下次預先填好
+const NAME_KEY = 'math-name';
 const picked = () => [...form.querySelectorAll('input[type=radio]:checked')];
 const boardKey = () => [type.id, ...picked().map(i => i.value)].join('|');
 const esc = s => s.replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
-let recorded = false, missed = false;
-function record(s) {
-  if (recorded) return; // 同一批題目連按對答案只記一次
-  recorded = true;
-  const board = load(BOARD_KEY, {}), k = boardKey(), at = Date.now();
-  board[k] = [...(board[k] || []), { name: $('who').value.trim() || '我', s, at }].sort((a, b) => a.s - b.s).slice(0, 10);
-  save(BOARD_KEY, board);
-  paintBoard(at);
+let recorded = false, missed = false, board = { k: '', rows: [] };
+
+async function fetchBoard() {
+  const k = boardKey();
+  const rows = await fetch('/api/board?k=' + encodeURIComponent(k)).then(r => (r.ok ? r.json() : [])).catch(() => []);
+  return (board = { k, rows });
 }
-function paintBoard(fresh) {
-  const rows = load(BOARD_KEY, {})[boardKey()] || [];
+function drawBoard(fresh) {
+  $('boardList').innerHTML = board.rows.length
+    ? board.rows.map((r, i) => `<li${r.id === fresh ? ' class="new"' : ''}><b>${i + 1}</b><span>${esc(r.name)}</span><time>${mmss(r.secs)}</time></li>`).join('')
+    : '<li class="empty">還沒有人上榜,全對就有機會</li>';
+}
+async function paintBoard() {
   $('boardFor').textContent = [type.name, ...picked().map(i => i.nextElementSibling.textContent + (i.name === 'count' ? ' 題' : ''))].join(' · ');
-  $('boardList').innerHTML = rows.length
-    ? rows.map((r, i) => `<li${r.at === fresh ? ' class="new"' : ''}><b>${i + 1}</b><span>${esc(r.name)}</span><time>${mmss(r.s)}</time></li>`).join('')
-    : '<li class="empty">還沒有紀錄,全對就會上榜</li>';
+  const k = boardKey();
+  await fetchBoard();
+  if (k === boardKey()) drawBoard(); // 抓的時候又換了選項,就別蓋掉新的
 }
-$('who').value = load(NAME_KEY, '');
-$('who').addEventListener('change', () => save(NAME_KEY, $('who').value.trim()));
+
+async function record(secs) {
+  if (recorded || secs < 1) return; // 同一批題目連按對答案只記一次
+  recorded = true;
+  const k = boardKey(), { rows } = await fetchBoard();
+  if (rows.length >= 10 && secs >= rows[9].secs) return;
+  const dlg = $('rankDlg');
+  $('rankRank').textContent = rows.filter(r => r.secs <= secs).length + 1;
+  $('rankTime').textContent = human(secs);
+  try { $('rankName').value = localStorage.getItem(NAME_KEY) || ''; } catch { /* 無痕模式 */ }
+  // 等彩帶噴一下再跳出來
+  setTimeout(() => dlg.showModal(), 900);
+  dlg.onclose = async () => {
+    const name = $('rankName').value.trim();
+    if (dlg.returnValue !== 'ok' || !name) return;
+    try { localStorage.setItem(NAME_KEY, name); } catch { /* 無痕模式存不了就算了 */ }
+    const res = await fetch('/api/board', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k, name, secs }),
+    }).then(r => r.json()).catch(() => null);
+    if (!res?.rows || k !== boardKey()) return;
+    board = { k, rows: res.rows };
+    drawBoard(res.id);
+    $('board').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+}
 
 // 已經填了答案就先確認,避免手誤把整張洗掉
 const dirty = () => [...sheet.querySelectorAll('input[data-ans]')].some(i => i.value);
