@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS board (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   k TEXT NOT NULL,
   name TEXT NOT NULL,
-  secs INTEGER NOT NULL,
+  ms INTEGER NOT NULL, -- 全對用時,毫秒
   at INTEGER NOT NULL
 );
-CREATE INDEX IF NOT EXISTS board_k ON board (k, secs, at);
+CREATE INDEX IF NOT EXISTS board_k ON board (k, ms, at);

@@ -121,10 +121,16 @@ const TAP = [[1760, 0, .06, 'sine', .04]];
 
 // 計時:第一次填答才開始,對完答案停住,重新出題歸零
 let t0 = null, ticking = null;
-const secs = () => (t0 ? Math.round((Date.now() - t0) / 1000) : 0);
-const mmss = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-const human = s => (s >= 60 ? `${Math.floor(s / 60)} 分 ${s % 60} 秒` : `${s} 秒`);
-const paintClock = () => { $('clock').textContent = mmss(secs()); };
+// 時間一律以毫秒計;跑的時候只顯示到秒,停下來才秀出毫秒
+const elapsed = () => (t0 ? Date.now() - t0 : 0);
+const pad = (x, n = 2) => String(x).padStart(n, '0');
+const mmss = ms => `${pad(Math.floor(ms / 60000))}:${pad(Math.floor(ms / 1000) % 60)}`;
+const mmssms = ms => `${mmss(ms)}.${pad(ms % 1000, 3)}`;
+const human = ms => {
+  const s = `${Math.floor(ms / 1000) % 60}.${pad(ms % 1000, 3)} 秒`;
+  return ms >= 60000 ? `${Math.floor(ms / 60000)} 分 ${s}` : s;
+};
+const paintClock = () => { $('clock').textContent = mmss(elapsed()); };
 function startTimer() {
   if (t0) return;
   t0 = Date.now();
@@ -151,7 +157,8 @@ function check() {
   const right = inp => inp.value.trim() === inp.dataset.ans;
   const ok = inputs.filter(right).length;
   const all = ok === inputs.length;
-  const used = secs();
+  const used = elapsed();
+  if (t0) $('clock').textContent = mmssms(used);
 
   // 先清掉再重上,連按兩次對答案動畫才會重播
   inputs.forEach(inp => { inp.parentElement.classList.remove('ok', 'bad'); inp.parentElement.style.animationDelay = ''; });
@@ -215,7 +222,7 @@ async function fetchBoard() {
 }
 function drawBoard(fresh) {
   $('boardList').innerHTML = board.rows.length
-    ? board.rows.map((r, i) => `<li${r.id === fresh ? ' class="new"' : ''}><b>${i + 1}</b><span>${esc(r.name)}</span><time>${mmss(r.secs)}</time></li>`).join('')
+    ? board.rows.map((r, i) => `<li${r.id === fresh ? ' class="new"' : ''}><b>${i + 1}</b><span>${esc(r.name)}</span><time>${mmssms(r.ms)}</time></li>`).join('')
     : '<li class="empty">還沒有人上榜,全對就有機會</li>';
 }
 async function paintBoard() {
@@ -225,14 +232,14 @@ async function paintBoard() {
   if (k === boardKey()) drawBoard(); // 抓的時候又換了選項,就別蓋掉新的
 }
 
-async function record(secs) {
-  if (recorded || secs < 1) return; // 同一批題目連按對答案只記一次
+async function record(ms) {
+  if (recorded || ms < 1000) return; // 同一批題目連按對答案只記一次
   recorded = true;
   const k = boardKey(), { rows } = await fetchBoard();
-  if (rows.length >= 10 && secs >= rows[9].secs) return;
+  if (rows.length >= 10 && ms >= rows[9].ms) return;
   const dlg = $('rankDlg');
-  $('rankRank').textContent = rows.filter(r => r.secs <= secs).length + 1;
-  $('rankTime').textContent = human(secs);
+  $('rankRank').textContent = rows.filter(r => r.ms <= ms).length + 1;
+  $('rankTime').textContent = human(ms);
   try { $('rankName').value = localStorage.getItem(NAME_KEY) || ''; } catch { /* 無痕模式 */ }
   // 等彩帶噴一下再跳出來
   setTimeout(() => dlg.showModal(), 900);
@@ -241,7 +248,7 @@ async function record(secs) {
     if (dlg.returnValue !== 'ok' || !name) return;
     try { localStorage.setItem(NAME_KEY, name); } catch { /* 無痕模式存不了就算了 */ }
     const res = await fetch('/api/board', {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k, name, secs }),
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k, name, ms }),
     }).then(r => r.json()).catch(() => null);
     if (!res?.rows || k !== boardKey()) return;
     board = { k, rows: res.rows };
