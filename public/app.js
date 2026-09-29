@@ -76,7 +76,7 @@ function render() {
   $('score').textContent = '';
   $('score').classList.remove('win');
   resetTimer();
-  recorded = false;
+  recorded = missed = false;
   paintBoard();
   flags();
 }
@@ -163,11 +163,14 @@ function check() {
   }));
 
   $('score').textContent =
-    (all ? `全對!${ok} / ${inputs.length}` : `答對 ${ok} / ${inputs.length} 格`) +
+    (all ? (missed ? `訂正完成!${ok} / ${inputs.length}` : `全對!${ok} / ${inputs.length}`) : `答對 ${ok} / ${inputs.length} 格`) +
     (t0 ? `,用了 ${human(used)}` : '');
-  $('score').classList.toggle('win', all);
-  play(all ? CHEER : NOPE);
-  if (all) { confetti(); if (t0) record(used); }
+  // 對過一次有錯,之後改對只算訂正:不撒彩帶、不上排行榜
+  const win = all && !missed;
+  if (!all) missed = true;
+  $('score').classList.toggle('win', win);
+  play(win ? CHEER : all ? [[1047, 0, .2], [1319, .1, .3]] : NOPE);
+  if (win) { confetti(); if (t0) record(used); }
 }
 
 // 全對撒彩帶:一張蓋全畫面、不吃點擊的 canvas,放完就拆掉
@@ -204,7 +207,7 @@ const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } cat
 const picked = () => [...form.querySelectorAll('input[type=radio]:checked')];
 const boardKey = () => [type.id, ...picked().map(i => i.value)].join('|');
 const esc = s => s.replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
-let recorded = false;
+let recorded = false, missed = false;
 function record(s) {
   if (recorded) return; // 同一批題目連按對答案只記一次
   recorded = true;
