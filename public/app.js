@@ -130,6 +130,7 @@ function startTimer() {
   t0 = Date.now();
   ticking = setInterval(paintClock, 1000);
   $('timer').classList.add('run');
+  $('timer').hidden = false;
   paintClock();
 }
 function stopTimer() {
@@ -141,6 +142,7 @@ function resetTimer() {
   stopTimer();
   t0 = null;
   $('clock').textContent = '00:00';
+  $('timer').hidden = true; // 還沒開始作答就不顯示 00:00
 }
 
 function check() {
