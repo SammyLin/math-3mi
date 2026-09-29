@@ -200,7 +200,7 @@ function confetti() {
   })(start);
 }
 
-// 排行榜:全站共用(functions/api/board.js + D1),同一組選項(題型、位數、進借位、題數)比全對用時,留前 10 名
+// 排行榜:全站共用(functions/api/board.js + D1),同一組選項(題型、進借位、題數)比全對用時,留前 10 名
 // 擠進前 10 才跳出視窗問名字;名字記在這台裝置,下次預先填好
 const NAME_KEY = 'math-name';
 const picked = () => [...form.querySelectorAll('input[type=radio]:checked')];

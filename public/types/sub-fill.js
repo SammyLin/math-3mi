@@ -1,4 +1,4 @@
-// 直式減法填空:被減數、減數、差都是 n 位數,每一位剛好挖一格
+// 直式減法填空:被減數、減數、差都是 n 位數(目前固定 4 位),每一位剛好挖一格
 function needsBorrow(a, b, n) {
   const da = M.digits(a, n), db = M.digits(b, n);
   let br = 0, any = false;
@@ -16,7 +16,6 @@ M.register({
   title: '直式<span>減法填空</span>',
   desc: '每一位都有一格要自己想',
   options: [
-    { name: 'n', label: '位數', choices: [['2', '2 位'], ['3', '3 位'], ['4', '4 位']], value: '4' },
     { name: 'borrow', label: '借位', choices: [['any', '不限'], ['yes', '要借位'], ['no', '不借位']], value: 'any' },
   ],
   flags: [{ name: 'place', label: '千百十個' }],
@@ -24,7 +23,7 @@ M.register({
   howto: { a: 734, b: 258, sign: 'minus' },
 
   make(opts) {
-    const n = +opts.n, lo = 10 ** (n - 1), hi = 10 ** n - 1;
+    const n = 4, lo = 10 ** (n - 1), hi = 10 ** n - 1;
     for (;;) {
       const b = M.rand(lo, hi), d = M.rand(lo, hi), a = b + d;
       if (a > hi) continue;

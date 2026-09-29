@@ -220,12 +220,12 @@ button.outline{border-color:var(--primary);color:var(--primary)}
     <div class="topics">
       <a class="topic" href="/add/" style="--c:var(--p0)">
         <span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></span>
-        <span><h3>直式加法填空</h3><p>進位 · 2 到 4 位數</p></span>
+        <span><h3>直式加法填空</h3><p>進位 · 四位數</p></span>
         <svg class="i go" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
       </a>
       <a class="topic" href="/sub/" style="--c:var(--p3)">
         <span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></span>
-        <span><h3>直式減法填空</h3><p>借位 · 2 到 4 位數</p></span>
+        <span><h3>直式減法填空</h3><p>借位 · 四位數</p></span>
         <svg class="i go" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
       </a>
     </div>
@@ -281,7 +281,7 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 <!--only:home-->
     <h2>直式加減法填空,是在練什麼?</h2>
     <p>一般的直式計算只留答案那一列給小孩填。這裡不一樣:<strong>每一個直欄都會挖掉一格</strong>,挖掉的可能在被加數、加數,也可能在答案。因為一欄只缺一個數,由右往左一欄一欄推,答案還是只有一種填法,但小孩沒辦法「照著步驟抄」,必須真的知道這一欄在做什麼。</p>
-    <p>適合已經學過直式加減、正在練進位與借位的國小二到四年級。位數可以選 2 到 4 位,也可以指定<strong>一定要進位</strong>或<strong>完全不進位</strong>,拿來針對弱點出題。</p>
+    <p>適合已經學過直式加減、正在練進位與借位的國小二到四年級。題目都是四位數,可以指定<strong>一定要進位</strong>或<strong>完全不進位</strong>,拿來針對弱點出題。</p>
     <p>兩種題型各有一頁,裡面有一步一步的動畫和文字說明:<a href="/add/">直式加法填空(進位)</a>、<a href="/sub/">直式減法填空(借位)</a>。</p>
 
     <h3>最常見的三個錯</h3>
@@ -297,7 +297,7 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 <!--/only:home-->
 <!--only:add-->
     <h2>直式加法的進位,是怎麼來的</h2>
-    <p>這一頁專練直式加法填空:兩個加數和答案都是同樣位數,<strong>每一個直欄都會挖掉一格</strong>,缺的可能在上面兩列,也可能在答案。位數可以選 2 到 4 位,也可以指定一定要進位或完全不進位。</p>
+    <p>這一頁專練直式加法填空:兩個加數和答案都是同樣位數,<strong>每一個直欄都會挖掉一格</strong>,缺的可能在上面兩列,也可能在答案。題目都是四位數,可以指定一定要進位或完全不進位。</p>
     <p>以 476 + 258 為例,從個位開始往左算:</p>
     <ol>
       <li><strong>個位</strong>:6 + 8 = 14。個位只能放一個數字,所以寫 4,多出來的 10 換成 1 個十,記在十位上面。這個小小的 1 就是進位。</li>
@@ -316,7 +316,7 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 <!--/only:add-->
 <!--only:sub-->
     <h2>直式減法的借位,到底在借什麼</h2>
-    <p>這一頁專練直式減法填空:被減數、減數和差都是同樣位數,<strong>每一個直欄都會挖掉一格</strong>,缺的位置不固定。位數可以選 2 到 4 位,也可以指定一定要借位或完全不借位。</p>
+    <p>這一頁專練直式減法填空:被減數、減數和差都是同樣位數,<strong>每一個直欄都會挖掉一格</strong>,缺的位置不固定。題目都是四位數,可以指定一定要借位或完全不借位。</p>
     <p>以 734 - 258 為例,一樣從個位開始:</p>
     <ol>
       <li><strong>個位</strong>:4 比 8 小,不夠減。跟十位借 1 個十,十位的 3 劃掉改成 2,個位的 4 變成 14,14 - 8 = 6。</li>
@@ -358,10 +358,10 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 <!-- ponytail: 改 js 要手動把 ?v= 加一;math.3mi.ai 的 zone 設定會把 _headers 的 max-age=0 蓋成 4 小時 -->
 <!-- 新題型:在 types/ 加一個檔,再在這裡多一行 script -->
 <!--not:home-->
-<script src="/app.js?v=12" defer></script>
-<script src="/types/sub-fill.js?v=12" defer></script>
-<script src="/types/add-fill.js?v=12" defer></script>
-<script src="/howto.js?v=12" defer></script>
+<script src="/app.js?v=13" defer></script>
+<script src="/types/sub-fill.js?v=13" defer></script>
+<script src="/types/add-fill.js?v=13" defer></script>
+<script src="/howto.js?v=13" defer></script>
 <!--/not:home-->
 </body>
 </html>

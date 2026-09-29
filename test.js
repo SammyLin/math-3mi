@@ -16,7 +16,7 @@ const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
 for (const t of M.types) {
   const c = CHECK[t.id];
   assert(c, `新題型 ${t.id} 要在 test.js 的 CHECK 補上驗證方式`);
-  for (const n of ['2', '3', '4']) for (const mode of ['any', 'yes', 'no']) for (let k = 0; k < 200; k++) {
+  for (const n of ['4']) for (const mode of ['any', 'yes', 'no']) for (let k = 0; k < 200; k++) {
     const p = t.make({ n, [c.opt]: mode }), N = +n;
     const [a, b, r] = p.nums.map(x => +x.join(''));
     assert(c.op(a, b) === r, `${t.id} 算式錯 ${a},${b},${r}`);

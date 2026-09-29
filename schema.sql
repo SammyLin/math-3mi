@@ -1,4 +1,4 @@
--- 排行榜:k = 題型|位數|進借位|題數,每個 k 只留前 10 名
+-- 排行榜:k = 題型|進借位|題數,每個 k 只留前 10 名
 -- npx wrangler d1 execute math-3mi --remote --file schema.sql
 CREATE TABLE IF NOT EXISTS board (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

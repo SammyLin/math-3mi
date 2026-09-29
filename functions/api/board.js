@@ -1,7 +1,7 @@
 // 全域排行榜。GET ?k= 拿前 10 名;POST { k, name, secs } 上榜。
-// k 的格式跟 app.js 的 boardKey() 一致:題型|位數|進借位|題數
+// k 的格式跟 app.js 的 boardKey() 一致:題型|進借位|題數
 // ponytail: 時間是前端回報的,有心人可以亂送;真的被灌爆再加 Turnstile 或伺服器端出題計時
-const KEY = /^(add-fill|sub-fill)\|[234]\|(any|yes|no)\|(1|4|6|10)$/;
+const KEY = /^(add-fill|sub-fill)\|(any|yes|no)\|(1|4|6|10)$/;
 const top = (db, k) =>
   db.prepare('SELECT id, name, secs FROM board WHERE k = ? ORDER BY secs, at LIMIT 10').bind(k).all().then(r => r.results);
 
