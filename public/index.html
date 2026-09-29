@@ -73,7 +73,6 @@ main{max-width:1152px;margin:0 auto;padding:0 16px 48px}
 .chip span:hover{background:var(--soft)}
 .chip input:checked+span{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
 .chip input:focus-visible+span{outline:3px solid color-mix(in srgb,var(--primary) 50%,transparent);outline-offset:2px}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
 button{font:inherit;font-weight:500;font-size:15px;border:1px solid var(--border);border-radius:8px;padding:9px 16px;cursor:pointer;background:var(--card);color:var(--ink);display:inline-flex;align-items:center;gap:6px;transition:all .15s}
 button:hover{background:var(--soft)}
 button.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
@@ -149,9 +148,27 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 @keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-6px)}30%{transform:translateX(6px)}45%{transform:translateX(-4px)}60%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
 @media (prefers-reduced-motion:reduce){.cell.ok,.cell.bad,.score.win{animation:none}}
 
+.finish{flex-wrap:wrap}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+.board{max-width:28rem;margin:24px auto 0;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 4px 6px -1px rgb(0 0 0/.05)}
+.board-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.board h2{margin:0;font-size:20px;display:flex;align-items:center;gap:8px}
+.board h2 svg{color:var(--primary)}
+.who{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.who input{font:inherit;color:var(--ink);width:8em;padding:5px 8px;border:1px solid var(--border);border-radius:8px}
+.board-for{margin:6px 0 10px;font-size:13px;color:var(--muted)}
+.board-list{list-style:none;margin:0;padding:0}
+.board-list li{display:flex;align-items:center;gap:10px;padding:7px 4px;border-top:1px solid var(--border)}
+.board-list li b{width:1.6em;font-family:Nunito,sans-serif;font-weight:800;color:var(--muted);text-align:center}
+.board-list li:nth-child(1) b{color:#e0a100}.board-list li:nth-child(2) b{color:#a8a29e}.board-list li:nth-child(3) b{color:#c2703d}
+.board-list li span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board-list li time{font-family:Nunito,sans-serif;font-weight:800;font-variant-numeric:tabular-nums}
+.board-list li.new{background:color-mix(in srgb,var(--primary) 14%,var(--card));border-radius:8px;animation:pop .4s ease}
+.board-list li.empty{color:var(--muted);justify-content:center}
+
 @media print{
   body{background:#fff}
-  .top,.hero p,.panel,.score,.foot,.tut,.guide,.finish{display:none}
+  .top,.hero p,.panel,.score,.foot,.tut,.guide,.finish,.board{display:none}
   .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
   .cell input{color:transparent}
 }
@@ -175,9 +192,6 @@ button.outline{border-color:var(--primary);color:var(--primary)}
   <section class="hero"><h2 id="title">{{HERO}}</h2><p id="desc">每一位都有一格要自己想</p></section>
   <form class="panel" id="opts" onsubmit="return false">
     <div id="fields" class="fields"></div>
-    <div class="actions">
-      <button type="button" class="primary" id="newBtn"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>出題</button>
-    </div>
   </form>
 
   <details class="tut" id="tut" hidden>
@@ -196,8 +210,17 @@ button.outline{border-color:var(--primary);color:var(--primary)}
   <div class="finish">
     <span class="timer" id="timer"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b id="clock">00:00</b></span>
     <button type="button" class="primary" id="checkBtn"><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>對答案</button>
+    <button type="button" class="outline" id="newBtn"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>重新出題</button>
     <button type="button" id="soundBtn" aria-pressed="true" aria-label="音效"></button>
   </div>
+  <section class="board" aria-labelledby="boardTitle">
+    <div class="board-head">
+      <h2 id="boardTitle"><svg class="i" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>排行榜</h2>
+      <label class="who">名字 <input id="who" maxlength="12" placeholder="我" autocomplete="off"></label>
+    </div>
+    <p class="board-for" id="boardFor"></p>
+    <ol class="board-list" id="boardList"></ol>
+  </section>
   <section class="guide">
 <!--only:home-->
     <h2>直式加減法填空,是在練什麼?</h2>
@@ -278,9 +301,9 @@ button.outline{border-color:var(--primary);color:var(--primary)}
 </div></footer>
 <!-- ponytail: 改 js 要手動把 ?v= 加一;math.3mi.ai 的 zone 設定會把 _headers 的 max-age=0 蓋成 4 小時 -->
 <!-- 新題型:在 types/ 加一個檔,再在這裡多一行 script -->
-<script src="/app.js?v=7" defer></script>
-<script src="/types/sub-fill.js?v=7" defer></script>
-<script src="/types/add-fill.js?v=7" defer></script>
-<script src="/howto.js?v=7" defer></script>
+<script src="/app.js?v=8" defer></script>
+<script src="/types/sub-fill.js?v=8" defer></script>
+<script src="/types/add-fill.js?v=8" defer></script>
+<script src="/howto.js?v=8" defer></script>
 </body>
 </html>

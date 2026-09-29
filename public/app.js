@@ -54,7 +54,8 @@ const chip = (kind, name, value, text, checked) =>
 const group = (label, inner) => `<div class="group"><b>${label}</b>${inner}</div>`;
 
 function setup() {
-  const want = document.body.dataset.type || location.hash.slice(1);
+  // data-type 由 build.js 填;萬一部署到沒建置過的模板,至少靠網址認得題型
+  const want = document.body.dataset.type || M.types.find(t => t.path === location.pathname)?.id || location.hash.slice(1);
   type = M.types.find(t => t.id === want) || M.types[0];
   $('types').innerHTML = M.types.length < 2 ? '' :
     M.types.map(t => `<a href="${t.path}" class="chip"><span${t === type ? ' class="on"' : ''}>${t.name}</span></a>`).join('');
@@ -75,6 +76,8 @@ function render() {
   $('score').textContent = '';
   $('score').classList.remove('win');
   resetTimer();
+  recorded = false;
+  paintBoard();
   flags();
 }
 
@@ -83,7 +86,8 @@ function flags() {
   (type.flags || []).forEach(({ name }) => sheet.classList.toggle('flag-' + name, f.has(name)));
 }
 
-// 音效現場合成,不放音檔。notes = [頻率, 幾秒後開始, 長度, 波形]
+// 音效現場合成,不放音檔。notes = [頻率, 幾秒後開始, 長度, 波形, 音量, 滑到的頻率]
+// 正弦主音再疊一個高八度的弱泛音,聽起來像鐵琴,不會像舊款電子錶那麼刺
 const SOUND_KEY = 'math-sound';
 const soundOn = () => { try { return localStorage.getItem(SOUND_KEY) !== 'off'; } catch { return true; } };
 let audio;
@@ -92,21 +96,28 @@ function play(notes) {
   try {
     audio ||= new (window.AudioContext || window.webkitAudioContext)();
     if (audio.state === 'suspended') audio.resume();
-    for (const [freq, at, dur, type] of notes) {
-      const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime + at;
-      o.type = type || 'sine';
-      o.frequency.value = freq;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g).connect(audio.destination);
-      o.start(t);
-      o.stop(t + dur + 0.02);
+    for (const [freq, at, dur, wave = 'sine', vol = .16, glide] of notes) {
+      const t = audio.currentTime + at;
+      for (const [mul, v] of wave === 'sine' ? [[1, vol], [2, vol * .25]] : [[1, vol]]) {
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.type = wave;
+        o.frequency.setValueAtTime(freq * mul, t);
+        if (glide) o.frequency.exponentialRampToValueAtTime(glide * mul, t + dur);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(v, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g).connect(audio.destination);
+        o.start(t);
+        o.stop(t + dur + 0.02);
+      }
     }
   } catch { /* 沒有 WebAudio 就靜音,別讓對答案掛掉 */ }
 }
-const CHEER = [[523, 0, .14], [659, .11, .14], [784, .22, .32]];
-const NOPE = [[196, 0, .18, 'square'], [147, .15, .3, 'square']];
+// 全對:Do Mi Sol 高Do 往上爬,最後兩顆亮晶晶的高音
+const CHEER = [[1047, 0, .2], [1319, .09, .2], [1568, .18, .2], [2093, .27, .6], [2637, .42, .35, 'sine', .06], [3136, .5, .45, 'sine', .05]];
+// 有錯:柔一點的「嗯—嗯」往下滑,不要嚇到小孩
+const NOPE = [[392, 0, .22, 'triangle', .14, 330], [294, .2, .38, 'triangle', .14, 247]];
+const TAP = [[1760, 0, .06, 'sine', .04]];
 
 // 計時:第一次填答才開始,對完答案停住,重新出題歸零
 let t0 = null, ticking = null;
@@ -154,7 +165,61 @@ function check() {
     (t0 ? `,用了 ${human(used)}` : '');
   $('score').classList.toggle('win', all);
   play(all ? CHEER : NOPE);
+  if (all) { confetti(); if (t0) record(used); }
 }
+
+// 全對撒彩帶:一張蓋全畫面、不吃點擊的 canvas,放完就拆掉
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas'), x = c.getContext('2d');
+  c.className = 'confetti';
+  c.width = innerWidth;
+  c.height = innerHeight;
+  document.body.append(c);
+  const r = $('score').getBoundingClientRect(), ox = r.left + r.width / 2, oy = r.top;
+  const colors = ['#3d9be0', '#5fa52e', '#e0a100', '#e8603f', '#ca8a04'];
+  const bits = Array.from({ length: 140 }, () => ({
+    x: ox, y: oy, vx: (Math.random() - .5) * 16, vy: -6 - Math.random() * 14,
+    a: Math.random() * 6, va: (Math.random() - .5) * .4, s: 7 + Math.random() * 6, c: colors[M.rand(0, 4)],
+  }));
+  const start = performance.now();
+  (function frame(now) {
+    x.clearRect(0, 0, c.width, c.height);
+    for (const b of bits) {
+      b.vy += .4; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.a += b.va;
+      x.save(); x.translate(b.x, b.y); x.rotate(b.a);
+      x.fillStyle = b.c; x.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2);
+      x.restore();
+    }
+    now - start < 2600 ? requestAnimationFrame(frame) : c.remove();
+  })(start);
+}
+
+// 排行榜:存在這台裝置(localStorage),同一組選項(題型、位數、進借位、題數)比全對用時,留前 10 名
+const BOARD_KEY = 'math-board', NAME_KEY = 'math-name';
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* 無痕模式存不了就算了 */ } };
+const picked = () => [...form.querySelectorAll('input[type=radio]:checked')];
+const boardKey = () => [type.id, ...picked().map(i => i.value)].join('|');
+const esc = s => s.replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
+let recorded = false;
+function record(s) {
+  if (recorded) return; // 同一批題目連按對答案只記一次
+  recorded = true;
+  const board = load(BOARD_KEY, {}), k = boardKey(), at = Date.now();
+  board[k] = [...(board[k] || []), { name: $('who').value.trim() || '我', s, at }].sort((a, b) => a.s - b.s).slice(0, 10);
+  save(BOARD_KEY, board);
+  paintBoard(at);
+}
+function paintBoard(fresh) {
+  const rows = load(BOARD_KEY, {})[boardKey()] || [];
+  $('boardFor').textContent = [type.name, ...picked().map(i => i.nextElementSibling.textContent + (i.name === 'count' ? ' 題' : ''))].join(' · ');
+  $('boardList').innerHTML = rows.length
+    ? rows.map((r, i) => `<li${r.at === fresh ? ' class="new"' : ''}><b>${i + 1}</b><span>${esc(r.name)}</span><time>${mmss(r.s)}</time></li>`).join('')
+    : '<li class="empty">還沒有紀錄,全對就會上榜</li>';
+}
+$('who').value = load(NAME_KEY, '');
+$('who').addEventListener('change', () => save(NAME_KEY, $('who').value.trim()));
 
 // 已經填了答案就先確認,避免手誤把整張洗掉
 const dirty = () => [...sheet.querySelectorAll('input[data-ans]')].some(i => i.value);
@@ -174,7 +239,7 @@ sheet.addEventListener('input', e => {
   const inp = e.target;
   inp.value = inp.value.replace(/\D/g, '');
   inp.parentElement.classList.remove('ok', 'bad');
-  if (inp.value) { startTimer(); step(inp, 1)?.focus(); }
+  if (inp.value) { startTimer(); play(TAP); step(inp, 1)?.focus(); }
 });
 
 // Tab 也照同一個順序;走到頭就讓瀏覽器接手,才出得了這張卷子
