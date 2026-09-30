@@ -49,7 +49,6 @@ for (const p of PAGES) {
   html = html
     .replace(new RegExp(`<!--not:${p.keep}-->[\\s\\S]*?<!--/not:${p.keep}-->`, 'g'), '')
     .replace(/<!--\/?not:\w+-->/g, '')
-    .replace(/{{YEAR}}/g, new Date().getFullYear())
     .replace(/{{TITLE}}/g, p.title)
     .replace(/{{OGTITLE}}/g, p.ogtitle)
     .replace(/{{DESC}}/g, p.desc)
